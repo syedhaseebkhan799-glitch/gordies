@@ -7,7 +7,7 @@ import { useOnline } from "@/lib/online";
 import { BackIcon } from "@/components/Icons";
 import { Button, ErrorText, Input, friendlyError } from "@/components/ui";
 
-// Reset with a 6-digit code from email (works the same on Android, Windows and localhost).
+// Reset with a code from email (works the same on Android, Windows and localhost).
 export default function ForgotPage() {
   const router = useRouter();
   const online = useOnline();
@@ -60,7 +60,7 @@ export default function ForgotPage() {
 
         {step === "email" ? (
           <form onSubmit={sendCode} className="mt-6 space-y-4">
-            <p className="text-muted">Enter your email. We will send you a 6-digit code.</p>
+            <p className="text-muted">Enter your email. We will send you a code.</p>
             <Input label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             <ErrorText>{error}</ErrorText>
             <Button type="submit" loading={loading} disabled={!online}>
@@ -78,7 +78,7 @@ export default function ForgotPage() {
               required
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
-              placeholder="123456"
+              placeholder="12345678"
             />
             <Input
               label="New password"
