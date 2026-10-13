@@ -5,7 +5,7 @@ Chat app for Gordon College friends. Next.js + Supabase.
 ## What it does (v1)
 
 - Sign up / sign in with email + password (stays logged in)
-- Forgot password with a code sent by email
+- Forgot password with a reset link sent by email
 - Profile setup: unique username, display name, optional photo
 - **Members list**: everyone who joined Gordies, Online / Offline (like a server), tap to chat
 - **# General** group chat: everyone who joins is in it (sender names + photos, "X is typing…", unread count)
@@ -19,8 +19,7 @@ Chat app for Gordon College friends. Next.js + Supabase.
 1. Create a free project at https://supabase.com.
 2. Supabase → **SQL Editor** → paste all of `supabase/schema.sql` → **Run**.
 3. Supabase → **Authentication → Sign In / Providers → Email**: turn **OFF** "Confirm email" (easier for friends).
-4. Supabase → **Authentication → Email Templates → Reset Password**: add this line to the message:
-   `Your Gordies code is: {{ .Token }}`
+4. Supabase → **Authentication → URL Configuration** → **Redirect URLs** → add `http://localhost:3000/**` (and later your Vercel link + `/**`). Needed for the password-reset link.
 5. Copy `.env.local.example` to `.env.local` and paste your values from Supabase → **Project Settings → API**.
 6. Run:
 

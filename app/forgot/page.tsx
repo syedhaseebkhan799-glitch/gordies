@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -7,47 +7,56 @@ import { useOnline } from "@/lib/online";
 import { BackIcon } from "@/components/Icons";
 import { Button, ErrorText, Input, friendlyError } from "@/components/ui";
 
-// Reset with a code from email (works the same on Android, Windows and localhost).
+// Reset by email link: Supabase's default "Reset Password" email has a link that
+// comes back here as /forgot/?reset=1 and logs the user in for a password change.
 export default function ForgotPage() {
   const router = useRouter();
   const online = useOnline();
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [step, setStep] = useState<"email" | "sent" | "checking" | "new" | "expired">("email");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function sendCode(e: React.FormEvent) {
+  // Came back from the email link?
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("reset") !== "1") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStep("checking");
+    const linkError = url.hash.includes("error=") || url.searchParams.has("error");
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN")) setStep("new");
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setStep("new");
+      else if (linkError) setStep("expired");
+      else setTimeout(() => setStep((s) => (s === "checking" ? "expired" : s)), 4000);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function sendLink(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/forgot/?reset=1`,
+    });
     setLoading(false);
     if (error) return setError(friendlyError(error.message));
-    setStep("code");
+    setStep("sent");
   }
 
-  async function resetPassword(e: React.FormEvent) {
+  async function saveNewPassword(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (password.length < 6) return setError("Password must be at least 6 characters.");
     setLoading(true);
-    try {
-      const { error: otpErr } = await supabase.auth.verifyOtp({
-        email: email.trim(),
-        token: code.trim(),
-        type: "recovery",
-      });
-      if (otpErr) throw otpErr;
-      const { error: updErr } = await supabase.auth.updateUser({ password });
-      if (updErr) throw updErr;
-      router.replace("/");
-    } catch (err) {
-      setError(friendlyError((err as Error).message));
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await supabase.auth.updateUser({ password });
+    setLoading(false);
+    if (error) return setError(friendlyError(error.message));
+    router.replace("/");
   }
 
   return (
@@ -58,28 +67,44 @@ export default function ForgotPage() {
       <div className="mx-auto w-full max-w-sm">
         <h1 className="text-2xl font-bold">Reset password</h1>
 
-        {step === "email" ? (
-          <form onSubmit={sendCode} className="mt-6 space-y-4">
-            <p className="text-muted">Enter your email. We will send you a code.</p>
+        {step === "email" && (
+          <form onSubmit={sendLink} className="mt-6 space-y-4">
+            <p className="text-muted">Enter your email. We will send you a reset link.</p>
             <Input label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             <ErrorText>{error}</ErrorText>
             <Button type="submit" loading={loading} disabled={!online}>
-              Send code
+              Send reset link
             </Button>
           </form>
-        ) : (
-          <form onSubmit={resetPassword} className="mt-6 space-y-4">
+        )}
+
+        {step === "sent" && (
+          <div className="mt-6 space-y-4">
+            <p className="text-4xl">📧</p>
             <p className="text-muted">
-              We sent a code to <b className="text-fg">{email}</b>. Check spam too.
+              We sent a link to <b className="text-fg">{email}</b>. Open the email and tap <b className="text-fg">Reset password</b>.
+              Check spam too.
             </p>
-            <Input
-              label="Code from email"
-              inputMode="numeric"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
-              placeholder="12345678"
-            />
+            <button type="button" onClick={() => setStep("email")} className="w-full text-sm text-muted">
+              Use a different email
+            </button>
+          </div>
+        )}
+
+        {step === "checking" && <p className="mt-6 text-muted">Checking your reset link…</p>}
+
+        {step === "expired" && (
+          <div className="mt-6 space-y-4">
+            <p className="text-muted">This reset link is invalid or has expired. Ask for a new one.</p>
+            <Button type="button" onClick={() => setStep("email")}>
+              Send a new link
+            </Button>
+          </div>
+        )}
+
+        {step === "new" && (
+          <form onSubmit={saveNewPassword} className="mt-6 space-y-4">
+            <p className="text-muted">Choose a new password.</p>
             <Input
               label="New password"
               type="password"
@@ -92,9 +117,6 @@ export default function ForgotPage() {
             <Button type="submit" loading={loading} disabled={!online}>
               Save new password
             </Button>
-            <button type="button" onClick={() => setStep("email")} className="w-full text-sm text-muted">
-              Use a different email
-            </button>
           </form>
         )}
       </div>
