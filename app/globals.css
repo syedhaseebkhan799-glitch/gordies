@@ -1,26 +1,93 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------- Theme colors (changed by Settings → Theme) ---------- */
+:root,
+:root[data-theme="light"] {
+  --bg: #f3f4f7;
+  --surface: #ffffff;
+  --surface-2: #eceef2;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e3e5ea;
+  --bubble-in: #ffffff;
+  --accent: #2563eb;
+  --dot: rgba(17, 24, 39, 0.07);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1015;
+  --surface: #161920;
+  --surface-2: #1f232c;
+  --text: #e8eaee;
+  --muted: #959cab;
+  --line: #2a2f3a;
+  --bubble-in: #1f232c;
+  --dot: rgba(255, 255, 255, 0.05);
+  color-scheme: dark;
+}
+
+:root[data-theme="amoled"] {
+  --bg: #000000;
+  --surface: #000000;
+  --surface-2: #111111;
+  --text: #f1f1f1;
+  --muted: #8d8d8d;
+  --line: #1d1d1d;
+  --bubble-in: #141414;
+  --dot: rgba(255, 255, 255, 0.05);
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-bubble-in: var(--bubble-in);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Chat wallpaper ---------- */
+.chat-wallpaper {
+  background: var(--bg);
+}
+:root[data-wallpaper="dots"] .chat-wallpaper {
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+:root[data-wallpaper="gradient"] .chat-wallpaper {
+  background-image: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--accent) 14%, var(--bg)),
+    var(--bg) 55%,
+    color-mix(in srgb, var(--accent) 8%, var(--bg))
+  );
+}
+
+/* ---------- Bubble style ---------- */
+.bubble {
+  border-radius: 18px;
+}
+:root[data-bubble="sharp"] .bubble {
+  border-radius: 6px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
