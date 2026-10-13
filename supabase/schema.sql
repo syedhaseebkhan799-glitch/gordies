@@ -200,6 +200,14 @@ create trigger messages_bump_chat
   after insert on public.messages
   for each row execute function public.bump_chat_time();
 
+-- Table access for logged-in users (Row Level Security above decides which rows).
+-- Needed when "Automatically expose new tables" is off in Supabase.
+grant usage on schema public to authenticated;
+grant select, insert, update on public.profiles       to authenticated;
+grant select                 on public.chats          to authenticated;
+grant select, insert         on public.messages       to authenticated;
+grant select, insert         on public.group_messages to authenticated;
+
 grant execute on function public.get_or_create_chat(uuid) to authenticated;
 grant execute on function public.mark_chat_seen(uuid)     to authenticated;
 grant execute on function public.my_chats()               to authenticated;
