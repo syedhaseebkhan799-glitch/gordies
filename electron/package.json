@@ -1,0 +1,8 @@
+{
+  "name": "gordies",
+  "productName": "Gordies",
+  "version": "1.0.0",
+  "description": "Chat app for Gordon College friends",
+  "author": "Gordies",
+  "main": "main.cjs"
+}

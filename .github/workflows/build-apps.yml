@@ -1,6 +1,7 @@
-# Builds the Android APK on GitHub's servers on every push to master,
-# and publishes it at: https://github.com/<owner>/<repo>/releases/latest/download/gordies.apk
-name: Android APK
+# Builds the Android APK and Windows installer on GitHub's servers on every push to master,
+# and publishes them at https://github.com/<owner>/<repo>/releases/latest/download/
+#   gordies.apk  and  gordies-setup.exe
+name: Build apps
 
 on:
   push:
@@ -39,6 +40,29 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Gordies (build ${{ github.run_number }})
-          body: Install gordies.apk on Android (allow "install unknown apps" when asked).
+          body: |
+            Android: install gordies.apk (allow "install unknown apps" when asked).
+            Windows: run gordies-setup.exe (if SmartScreen warns, click More info → Run anyway).
           files: gordies.apk
           make_latest: true
+
+  windows:
+    needs: apk
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Build installer
+        shell: bash
+        run: |
+          cp -r out electron/web
+          npx --yes electron-builder@26 --win --publish never -c.electronVersion=$(npm view electron@latest version)
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: dist-electron/gordies-setup.exe

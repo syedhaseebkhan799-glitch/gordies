@@ -4,6 +4,7 @@ Chat app for Gordon College friends. Next.js + Supabase.
 
 - **Website:** https://gordies.vercel.app
 - **Android APK:** https://github.com/syedhaseebkhan799-glitch/gordies/releases/latest/download/gordies.apk (rebuilt automatically on every push to `master`)
+- **Windows app:** https://github.com/syedhaseebkhan799-glitch/gordies/releases/latest/download/gordies-setup.exe
 
 ## What it does (v1)
 
@@ -51,6 +52,5 @@ Chrome DevTools (F12) → **Network** tab → change "No throttling" to **Offlin
 
 ## Coming next
 
-- Windows .exe (Electron)
 
 Note: Supabase's free email service only sends a few emails per hour, so password reset is rate-limited.

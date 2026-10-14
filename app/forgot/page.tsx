@@ -9,11 +9,12 @@ import { Button, ErrorText, Input, friendlyError } from "@/components/ui";
 
 // Reset by email link: Supabase's default "Reset Password" email has a link that
 // comes back here as /forgot/?reset=1 and logs the user in for a password change.
-// Inside the Android app the page runs on https://localhost, which an email link can't open,
-// so the link goes to the website instead.
+// Inside the Android app (https://localhost) or Windows app (app://gordies) an email link
+// can't open the page, so the link goes to the website instead.
 function siteOrigin() {
-  const { hostname, port, origin } = window.location;
-  return hostname === "localhost" && !port ? "https://gordies.vercel.app" : origin;
+  const { hostname, port, origin, protocol } = window.location;
+  const inApp = protocol === "app:" || (hostname === "localhost" && !port);
+  return inApp ? "https://gordies.vercel.app" : origin;
 }
 
 export default function ForgotPage() {

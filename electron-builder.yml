@@ -1,0 +1,16 @@
+# Windows installer. Built by GitHub Actions (see .github/workflows/build-apps.yml).
+appId: com.gordies.app
+productName: Gordies
+directories:
+  app: electron
+  output: dist-electron
+files:
+  - main.cjs
+  - package.json
+  - web/**
+win:
+  target: nsis
+nsis:
+  oneClick: true
+  artifactName: gordies-setup.exe
+  shortcutName: Gordies
