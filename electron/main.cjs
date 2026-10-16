@@ -48,6 +48,9 @@ if (!app.requestSingleInstanceLock()) {
     }
   });
 
+  // Windows only shows toast notifications for apps with an AppUserModelID.
+  app.setAppUserModelId("com.gordies.app");
+
   app.whenReady().then(() => {
     protocol.handle("app", (req) => {
       const file = fileFor(new URL(req.url).pathname) ?? path.join(WEB, "404.html");

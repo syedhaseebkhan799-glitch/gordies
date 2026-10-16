@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { PresenceProvider } from "@/lib/presence";
 import OfflineBanner from "@/components/OfflineBanner";
+import { NotificationsProvider } from "@/lib/notify";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <AuthProvider>
             <PresenceProvider>
+              <NotificationsProvider />
               <div className="mx-auto flex h-full max-w-2xl flex-col bg-bg sm:border-x sm:border-line">
                 <OfflineBanner />
                 <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
